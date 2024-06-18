@@ -1,0 +1,121 @@
+Q1> use Q2
+switched to db Q2
+Q2> const part1 = { pid: 1, pname: 'part1', pcolor: 'grey' };
+
+Q2> const part2 = { pid: 2, pname: 'part2', pcolor: 'red' };
+
+Q2> const part3 = { pid: 3, pname: 'part3', pcolor: 'silver' };
+
+Q2> const part4 = { pid: 4, pname: 'part4', pcolor: 'grey' };
+
+Q2> db.createCollection("Supplier")
+{ ok: 1 }
+Q2> db.Supplier.insertMany([
+... {
+... sid: 1,
+... sname: 'sup1',
+... saddr: 'loc1'
+... , parts: [part1, part2, part3]
+... },
+... {
+... sid: 2,
+... sname: 'sup2',
+... saddr: 'loc1',
+... parts: [part1, part4]
+... },
+... {
+... sid: 3,
+... sname: 'sup3',
+... saddr: 'loc2',
+... parts: [part2, part4]
+... }])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('66692ba1cf36ec930aa26a19'),
+    '1': ObjectId('66692ba1cf36ec930aa26a1a'),
+    '2': ObjectId('66692ba1cf36ec930aa26a1b')
+  }
+}
+Q2> db.Supplier.find().pretty()
+[
+  {
+    _id: ObjectId('66692ba1cf36ec930aa26a19'),
+    sid: 1,
+    sname: 'sup1',
+    saddr: 'loc1',
+    parts: [
+      { pid: 1, pname: 'part1', pcolor: 'grey' },
+      { pid: 2, pname: 'part2', pcolor: 'red' },
+      { pid: 3, pname: 'part3', pcolor: 'silver' }
+    ]
+  },
+  {
+    _id: ObjectId('66692ba1cf36ec930aa26a1a'),
+    sid: 2,
+    sname: 'sup2',
+    saddr: 'loc1',
+    parts: [
+      { pid: 1, pname: 'part1', pcolor: 'grey' },
+      { pid: 4, pname: 'part4', pcolor: 'grey' }
+    ]
+  },
+  {
+    _id: ObjectId('66692ba1cf36ec930aa26a1b'),
+    sid: 3,
+    sname: 'sup3',
+    saddr: 'loc2',
+    parts: [
+      { pid: 2, pname: 'part2', pcolor: 'red' },
+      { pid: 4, pname: 'part4', pcolor: 'grey' }
+    ]
+  }
+]
+Q2> db.Supplier.updateMany( { "parts.pname": 'part2' }, { $set: { "parts.$.pcolor": "white" } } );
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 2,
+  modifiedCount: 2,
+  upsertedCount: 0
+}
+Q2> db.Supplier.find().pretty()
+[
+  {
+    _id: ObjectId('66692ba1cf36ec930aa26a19'),
+    sid: 1,
+    sname: 'sup1',
+    saddr: 'loc1',
+    parts: [
+      { pid: 1, pname: 'part1', pcolor: 'grey' },
+      { pid: 2, pname: 'part2', pcolor: 'white' },
+      { pid: 3, pname: 'part3', pcolor: 'silver' }
+    ]
+  },
+  {
+    _id: ObjectId('66692ba1cf36ec930aa26a1a'),
+    sid: 2,
+    sname: 'sup2',
+    saddr: 'loc1',
+    parts: [
+      { pid: 1, pname: 'part1', pcolor: 'grey' },
+      { pid: 4, pname: 'part4', pcolor: 'grey' }
+    ]
+  },
+  {
+    _id: ObjectId('66692ba1cf36ec930aa26a1b'),
+    sid: 3,
+    sname: 'sup3',
+    saddr: 'loc2',
+    parts: [
+      { pid: 2, pname: 'part2', pcolor: 'white' },
+      { pid: 4, pname: 'part4', pcolor: 'grey' }
+    ]
+  }
+]
+Q2> const pidToFind = 1
+
+Q2> const sups = db.Supplier.find({"parts.pid": pidToFind}).toArray();
+Q2> sups.forEach((supplier) => { print(`Supplier ID: ${supplier.sid}, Supplier Name: ${supplier.sname}`); });
+Supplier ID: 1, Supplier Name: sup1
+Supplier ID: 2, Supplier Name: sup2

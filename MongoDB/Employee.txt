@@ -1,0 +1,131 @@
+db1> use Q1
+switched to db Q1
+Q1> db.Employee.insertMany([ { ssn: 1, name: "name1", dept: "dept1", salary: 5000, projects: [ { p_no: 5, domain: "Database", hours: 7 }, { p_no:1, domain: "Cloud", hours: 2 }, ] }, { ssn: 2, name: "name2", dept: "dept2", salary: 9000, projects: [ { p_no: 1, domain: "Automation", hours: 5 }, { p_no: 2, domain: "Server", hours: 3} ] }, { ssn: 3, name: "name3", dept: "dept2", salary: 7000, projects: [ { p_no: 3, domain: "Network", hours: 1},  { p_no: 4, domain: "Documentation", hours: 3 }, { p_no: 5, domain: "API", hours: 4 } ] } ])
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('66692348cf36ec930aa26a16'),
+    '1': ObjectId('66692348cf36ec930aa26a17'),
+    '2': ObjectId('66692348cf36ec930aa26a18')
+  }
+}
+Q1> db.Employee.find().pretty()
+[
+  {
+    _id: ObjectId('66692348cf36ec930aa26a16'),
+    ssn: 1,
+    name: 'name1',
+    dept: 'dept1',
+    salary: 5000,
+    projects: [
+      { p_no: 5, domain: 'Database', hours: 7 },
+      { p_no: 1, domain: 'Cloud', hours: 2 }
+    ]
+  },
+  {
+    _id: ObjectId('66692348cf36ec930aa26a17'),
+    ssn: 2,
+    name: 'name2',
+    dept: 'dept2',
+    salary: 9000,
+    projects: [
+      { p_no: 1, domain: 'Automation', hours: 5 },
+      { p_no: 2, domain: 'Server', hours: 3 }
+    ]
+  },
+  {
+    _id: ObjectId('66692348cf36ec930aa26a18'),
+    ssn: 3,
+    name: 'name3',
+    dept: 'dept2',
+    salary: 7000,
+    projects: [
+      { p_no: 3, domain: 'Network', hours: 1 },
+      { p_no: 4, domain: 'Documentation', hours: 3 },
+      { p_no: 5, domain: 'API', hours: 4 }
+    ]
+  }
+]
+Q1> db.Employee.find({dept: 'dept2'}).pretty()
+[
+  {
+    _id: ObjectId('66692348cf36ec930aa26a17'),
+    ssn: 2,
+    name: 'name2',
+    dept: 'dept2',
+    salary: 9000,
+    projects: [
+      { p_no: 1, domain: 'Automation', hours: 5 },
+      { p_no: 2, domain: 'Server', hours: 3 }
+    ]
+  },
+  {
+    _id: ObjectId('66692348cf36ec930aa26a18'),
+    ssn: 3,
+    name: 'name3',
+    dept: 'dept2',
+    salary: 7000,
+    projects: [
+      { p_no: 3, domain: 'Network', hours: 1 },
+      { p_no: 4, domain: 'Documentation', hours: 3 },
+      { p_no: 5, domain: 'API', hours: 4 }
+    ]
+  }
+]
+
+Q1> db.Employee.find({ "projects.p_no": 5 }, { name: 1 }).pretty();
+[
+  { _id: ObjectId('66692348cf36ec930aa26a16'), name: 'name1' },
+  { _id: ObjectId('66692348cf36ec930aa26a18'), name: 'name3' }
+]
+
+
+Q1> const depName = 'dept2';
+
+Q1> const raise = 0.15
+
+Q1> const result = db.Employee.updateMany(
+... { dept: depName},
+... {$mul: { salary: 1 + raise } }
+... );
+Q1> print(`Number of employees in department ${depName} awarded the increase: ${result.modifiedCount}`);
+Number of employees in department dept2 awarded the increase: 2
+
+Q1> db.Employee.find().pretty()
+[
+  {
+    _id: ObjectId('66692348cf36ec930aa26a16'),
+    ssn: 1,
+    name: 'name1',
+    dept: 'dept1',
+    salary: 5000,
+    projects: [
+      { p_no: 5, domain: 'Database', hours: 7 },
+      { p_no: 1, domain: 'Cloud', hours: 2 }
+    ]
+  },
+  {
+    _id: ObjectId('66692348cf36ec930aa26a17'),
+    ssn: 2,
+    name: 'name2',
+    dept: 'dept2',
+    salary: 10350,
+    projects: [
+      { p_no: 1, domain: 'Automation', hours: 5 },
+      { p_no: 2, domain: 'Server', hours: 3 }
+    ]
+  },
+  {
+    _id: ObjectId('66692348cf36ec930aa26a18'),
+    ssn: 3,
+    name: 'name3',
+    dept: 'dept2',
+    salary: 8049.999999999999,
+    projects: [
+      { p_no: 3, domain: 'Network', hours: 1 },
+      { p_no: 4, domain: 'Documentation', hours: 3 },
+      { p_no: 5, domain: 'API', hours: 4 }
+    ]
+  }
+]
+
