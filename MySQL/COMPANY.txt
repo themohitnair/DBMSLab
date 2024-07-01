@@ -1,0 +1,142 @@
+MariaDB [COMPANY]> create table DEPARTMENT(
+    -> ID int(5) primary key,
+    -> NAME varchar(20) not null
+    -> );
+Query OK, 0 rows affected (0.046 sec)
+
+MariaDB [COMPANY]> create table PROJECT(
+    -> ID int(5) primary key,
+    -> DOMAIN varchar(20) not null
+    -> );
+Query OK, 0 rows affected (0.011 sec)
+
+MariaDB [COMPANY]> create table EMPLOYEE(
+    -> SSN int(10) primary key,
+    -> NAME varchar(15) not null,
+    -> DID int(5) not null,
+    -> foreign key (DID) references DEPARTMENT(ID) ON DELETE CASCADE
+    -> );
+Query OK, 0 rows affected (0.014 sec)
+
+MariaDB [COMPANY]> create table WORKS_ON(
+    -> ESSN int(10),
+    -> PID int(5),
+    -> foreign key (ESSN) references EMPLOYEE(SSN) ON DELETE CASCADE,
+    -> foreign key (PID) references PROJECT(ID) ON DELETE CASCADE,
+    -> HOURS int(2)
+    -> );
+Query OK, 0 rows affected (0.009 sec)
+
+MariaDB [COMPANY]> insert into DEPARTMENT values (1, 'dname1'), (2, 'dname2'), (3, 'dname3');
+Query OK, 3 rows affected (0.007 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MariaDB [COMPANY]> insert into PROJECT values (1, 'Database'), (2, 'Database'), (3, 'Cloud'), (4, 'Server');
+Query OK, 4 rows affected (0.004 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+MariaDB [COMPANY]> insert into EMPLOYEE values (1, 'name1', 2), (2, 'name2', 3), (3, 'name3', 1), (4, 'name4', 3), (5, 'name5', 2);
+Query OK, 5 rows affected (0.003 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+MariaDB [COMPANY]> insert into WORKS_ON values (1, 1, 7), (1, 3, 4), (2, 4, 8), (2, 2, 9), (3, 1, 4), (3, 4, 10), (5, 3, 12);
+Query OK, 7 rows affected (0.008 sec)
+Records: 7  Duplicates: 0  Warnings: 0
+
+MariaDB [COMPANY]> select * from DEPARTMENT;
++----+--------+
+| ID | NAME   |
++----+--------+
+|  1 | dname1 |
+|  2 | dname2 |
+|  3 | dname3 |
++----+--------+
+3 rows in set (0.001 sec)
+
+MariaDB [COMPANY]> select * from EMPLOYEE;
++-----+-------+-----+
+| SSN | NAME  | DID |
++-----+-------+-----+
+|   1 | name1 |   2 |
+|   2 | name2 |   3 |
+|   3 | name3 |   1 |
+|   4 | name4 |   3 |
+|   5 | name5 |   2 |
++-----+-------+-----+
+5 rows in set (0.001 sec)
+
+MariaDB [COMPANY]> select * from PROJECT;
++----+----------+
+| ID | DOMAIN   |
++----+----------+
+|  1 | Database |
+|  2 | Database |
+|  3 | Cloud    |
+|  4 | Server   |
++----+----------+
+4 rows in set (0.000 sec)
+
+MariaDB [COMPANY]> select * from WORKS_ON;
++------+------+-------+
+| ESSN | PID  | HOURS |
++------+------+-------+
+|    1 |    1 |     7 |
+|    1 |    3 |     4 |
+|    2 |    4 |     8 |
+|    2 |    2 |     9 |
+|    3 |    1 |     4 |
+|    3 |    4 |    10 |
+|    5 |    3 |    12 |
++------+------+-------+
+7 rows in set (0.001 sec)
+
+
+
+MariaDB [COMPANY]> select E.SSN, E.NAME, E.DID from EMPLOYEE E join WORKS_ON W on W.ESSN = E.SSN join PROJECT P on  W.PID = P.ID where P.DOMAIN = 'Database' ORDER BY E.SSN;
++-----+-------+-----+
+| SSN | NAME  | DID |
++-----+-------+-----+
+|   1 | name1 |   2 |
+|   2 | name2 |   3 |
+|   3 | name3 |   1 |
++-----+-------+-----+
+3 rows in set (0.001 sec)
+
+MariaDB [COMPANY]> select D.ID, D.NAME, COUNT(E.SSN) as NO_OF_EMPS from DEPARTMENT D join EMPLOYEE E on E.DID = D.ID group by D.ID;
++----+--------+------------+
+| ID | NAME   | NO_OF_EMPS |
++----+--------+------------+
+|  1 | dname1 |          1 |
+|  2 | dname2 |          2 |
+|  3 | dname3 |          2 |
++----+--------+------------+
+3 rows in set (0.001 sec)
+
+MariaDB [COMPANY]> update WORKS_ON set WORKS_ON.PID = 4 where WORKS_ON.ESSN = 5;
+Query OK, 1 row affected (0.008 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [COMPANY]> select * from WORKS_ON;
++------+------+-------+
+| ESSN | PID  | HOURS |
++------+------+-------+
+|    1 |    1 |     7 |
+|    1 |    3 |     4 |
+|    2 |    4 |     8 |
+|    2 |    2 |     9 |
+|    3 |    1 |     4 |
+|    3 |    4 |    10 |
+|    5 |    4 |    12 |
++------+------+-------+
+7 rows in set (0.001 sec)
+
+MariaDB [COMPANY]> select E.SSN, E.NAME, SUM(W.HOURS) as TOTAL_HOURS from EMPLOYEE E join WORKS_ON W on W.ESSN = E.SSN group by E.SSN;
++-----+-------+-------------+
+| SSN | NAME  | TOTAL_HOURS |
++-----+-------+-------------+
+|   1 | name1 |          11 |
+|   2 | name2 |          17 |
+|   3 | name3 |          14 |
+|   5 | name5 |          12 |
++-----+-------+-------------+
+4 rows in set (0.001 sec)
