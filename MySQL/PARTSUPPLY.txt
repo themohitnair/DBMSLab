@@ -1,0 +1,118 @@
+MariaDB [PARTSUPPLY]> create table PART(
+    -> ID int(5) primary key,
+    -> NAME varchar(10) not null,
+    -> COLOR varchar(10) not null
+    -> );
+Query OK, 0 rows affected (0.014 sec)
+
+MariaDB [PARTSUPPLY]> create table SUPPLIER(
+    -> ID int(5) primary key,
+    -> NAME varchar(10) not null,
+    -> ADDR varchar(10) not null
+    -> );
+Query OK, 0 rows affected (0.014 sec)
+
+MariaDB [PARTSUPPLY]> create table SUPPLY(
+    -> SID int(5),
+    -> PID int(5),
+    -> QTY int(10) not null,
+    -> foreign key (SID) references SUPPLIER(ID) on delete cascade,
+    -> foreign key (PID) references PART(ID) on delete cascade
+    -> );
+Query OK, 0 rows affected (0.007 sec)
+
+MariaDB [PARTSUPPLY]> insert into PART values (1, 'part1', 'grey'), (2, 'part2', 'silver'), (3, 'part3', 'black'), (4, 'part4', 'grey');
+Query OK, 4 rows affected (0.011 sec)
+Records: 4  Duplicates: 0  Warnings: 0
+
+MariaDB [PARTSUPPLY]> insert into SUPPLIER values (1, 'supplier1', 'loc1'),  (2, 'supplier2', 'loc2'), (3, 'supplier3', 'loc3');
+Query OK, 3 rows affected (0.008 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+MariaDB [PARTSUPPLY]> insert into SUPPLY values (2, 1, 10), (2, 2, 7), (1, 2, 12), (1, 4, 15), (3, 3, 1);
+Query OK, 5 rows affected (0.008 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+MariaDB [PARTSUPPLY]> select * from PART;
++----+-------+--------+
+| ID | NAME  | COLOR  |
++----+-------+--------+
+|  1 | part1 | grey   |
+|  2 | part2 | silver |
+|  3 | part3 | black  |
+|  4 | part4 | grey   |
++----+-------+--------+
+4 rows in set (0.001 sec)
+
+MariaDB [PARTSUPPLY]> select * from SUPPLIER;
++----+-----------+------+
+| ID | NAME      | ADDR |
++----+-----------+------+
+|  1 | supplier1 | loc1 |
+|  2 | supplier2 | loc2 |
+|  3 | supplier3 | loc3 |
++----+-----------+------+
+3 rows in set (0.001 sec)
+
+MariaDB [PARTSUPPLY]> select * from SUPPLY;
++------+------+-----+
+| SID  | PID  | QTY |
++------+------+-----+
+|    2 |    1 |  10 |
+|    2 |    2 |   7 |
+|    1 |    2 |  12 |
+|    1 |    4 |  15 |
+|    3 |    3 |   1 |
++------+------+-----+
+5 rows in set (0.001 sec)
+
+MariaDB [PARTSUPPLY]> select P.ID, P.COLOR, P.NAME from PART P join SUPPLY S on S.PID = P.ID join SUPPLIER SP on SP.ID = S.SID where SP.NAME = 'supplier1';
++----+--------+-------+
+| ID | COLOR  | NAME  |
++----+--------+-------+
+|  2 | silver | part2 |
+|  4 | grey   | part4 |
++----+--------+-------+
+2 rows in set (0.001 sec)
+
+MariaDB [PARTSUPPLY]> SELECT SP.ID, SP.NAME from SUPPLIER SP join SUPPLY S on S.SID = SP.ID join PART P on P.ID = S.PID where P.NAME = 'part2' order by SP.ID;
++----+-----------+
+| ID | NAME      |
++----+-----------+
+|  1 | supplier1 |
+|  2 | supplier2 |
++----+-----------+
+2 rows in set (0.001 sec)
+
+MariaDB [PARTSUPPLY]> delete from PART where COLOR = 'black';
+Query OK, 1 row affected (0.004 sec)
+
+MariaDB [PARTSUPPLY]> select * from PART;
++----+-------+--------+
+| ID | NAME  | COLOR  |
++----+-------+--------+
+|  1 | part1 | grey   |
+|  2 | part2 | silver |
+|  4 | part4 | grey   |
++----+-------+--------+
+3 rows in set (0.001 sec)
+
+MariaDB [PARTSUPPLY]> select * from SUPPLY;
++------+------+-----+
+| SID  | PID  | QTY |
++------+------+-----+
+|    2 |    1 |  10 |
+|    2 |    2 |   7 |
+|    1 |    2 |  12 |
+|    1 |    4 |  15 |
++------+------+-----+
+4 rows in set (0.001 sec)
+
+MariaDB [PARTSUPPLY]> select P.ID, P.NAME, SUM(S.QTY) as NO_OF_PARTS_SUPPLIED from PART P join SUPPLY S on S.PID = P.ID group by S.SID order by P.ID;
++----+-------+----------------------+
+| ID | NAME  | NO_OF_PARTS_SUPPLIED |
++----+-------+----------------------+
+|  1 | part1 |                   17 |
+|  2 | part2 |                   27 |
++----+-------+----------------------+
+2 rows in set (0.001 sec)
