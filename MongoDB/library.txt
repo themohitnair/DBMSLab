@@ -1,0 +1,46 @@
+library> db.createCollection("book")
+{ ok: 1 }
+library> db.createCollection("student")
+{ ok: 1 }
+library> db.createCollection("borrows")
+{ ok: 1 }
+
+library> db.book.insertMany([ {_id: 1, title: "database", auth: "auth1", pub: "pub1"}, {_id: 2, title: "java", auth: "auth2", pub: "pub2"}, {_id: 3, title: "algorithms", auth: "auth3", pub: "pub3"}, {_id: 4, title: "microcontrollers", auth: "auth4", pub: "pub3"} ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+
+library> db.student.insertMany([ {_id: 1, name: "Kavya", sex: 'F'},  {_id: 2, name: "Monisha", sex: 'F'}, {_id: 3, name: "Ranjith", sex: 'M'}, {_id: 4, name: "Roshan", sex: 'M'}])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+
+library> db.borrows.insertMany([ {_id: 1, bisbn: 1, sid: 1, date: '2004-30-06'}, {_id: 2, bisbn: 2, sid: 1, date: '2004-01-07'}, {_id: 3, bisbn: 3, sid: 2, date: '2004-01-07'}, {_id: 4, bisbn: 4, sid: 3, date: '2004-02-07'}])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+
+library> db.book.find().pretty()
+[
+  { _id: 1, title: 'database', auth: 'auth1', pub: 'pub1' },
+  { _id: 2, title: 'java', auth: 'auth2', pub: 'pub2' },
+  { _id: 3, title: 'algorithms', auth: 'auth3', pub: 'pub3' },
+  { _id: 4, title: 'microcontrollers', auth: 'auth4', pub: 'pub3' }
+]
+library> db.student.find().pretty()
+[
+  { _id: 1, name: 'Kavya', sex: 'F' },
+  { _id: 2, name: 'Monisha', sex: 'F' },
+  { _id: 3, name: 'Ranjith', sex: 'M' },
+  { _id: 4, name: 'Roshan', sex: 'M' }
+]
+library> db.borrows.find().pretty()
+[
+  { _id: 1, bisbn: 1, sid: 1, date: '2004-30-06' },
+  { _id: 2, bisbn: 2, sid: 1, date: '2004-01-07' },
+  { _id: 3, bisbn: 3, sid: 2, date: '2004-01-07' },
+  { _id: 4, bisbn: 4, sid: 3, date: '2004-02-07' }
+]
+
+library> db.book.aggregate(
+... {$match: {auth: "auth1"}},
+... {$project: {_id: 1, title: 1, pub: 1}}
+... )
+[ { _id: 1, title: 'database', pub: 'pub1' } ]
+
+library> db.borrows.aggregate( { $lookup: { from: "book", localField: "bisbn", foreignField: "_id", as: "bookinfo" } }, {$unwind: "$bookinfo"}, {$match: {"bookinfo.title": "database"}}, { $lookup: { from: "student", localField: "sid", foreignField: "_id", as: "borrowInfo"}}, {$project: {name: "$borrowInfo.name"}})
+[ { _id: 1, name: [ 'Kavya' ] } ]
