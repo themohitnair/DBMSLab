@@ -1,0 +1,102 @@
+company> db.createCollection("employee")
+{ ok: 1 }
+company> db.createCollection("department")
+{ ok: 1 }
+company> db.createCollection("project")
+{ ok: 1 }
+
+company> db.department.insertMany([{ _id: 1, dept: "Database" }, { _id: 2, dept: "Cloud" }, { _id: 3, dept: "HR" }, { _id: 4, dept: "Server" }])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+
+company> db.project.insertMany([{ _id: 1, dom: "database"}, { _id: 2, dom: "cloud" }, { _id: 3, dom: "server" },  {_id: 4, dom: "frontend" },  { _id: 5, dom: "systems" }]);
+{
+  acknowledged: true,
+  insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5 }
+}
+
+company> db.employee.insertMany([
+... { _id: 1, name: "Amar", deptno: 1, projects: [{ pno: 1, hours: 12}, { pno: 2, hours: 5}]},
+... { _id: 2, name: "Akbar", deptno: 3, projects: [{ pno: 4, hours: 20}, { pno: 3, hours: 15},  { pno: 1, hours: 10}]},
+... { _id: 3, name: "Anthony", deptno: 4, projects: [{ pno: 2, hours: 7}, { pno: 3, hours: 19 }]},
+... { _id: 4, name: "Abraham", deptno: 2, projects: [{ pno: 2, hours: 19}]}
+... { _id: 5, name: "Shailaja", deptno: 3, projects: [ { pno: 2, hours: 7 }, { pno: 1, hours: 19 } ]}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+
+company> db.employee.find().pretty()
+[
+  {
+    _id: 1,
+    name: 'Amar',
+    deptno: 1,
+    projects: [ { pno: 1, hours: 12 }, { pno: 2, hours: 5 } ]
+  },
+  {
+    _id: 2,
+    name: 'Akbar',
+    deptno: 3,
+    projects: [
+      { pno: 4, hours: 20 },
+      { pno: 3, hours: 15 },
+      { pno: 1, hours: 10 }
+    ]
+  },
+  {
+    _id: 3,
+    name: 'Anthony',
+    deptno: 4,
+    projects: [ { pno: 2, hours: 7 }, { pno: 3, hours: 19 } ]
+  },
+  {
+    _id: 4,
+    name: 'Abraham',
+    deptno: 2,
+    projects: [ { pno: 2, hours: 19 } ]
+  },
+  {
+    _id: 5,
+    name: 'Shailaja',
+    deptno: 3,
+    projects: [ { pno: 2, hours: 7 }, { pno: 1, hours: 19 } ]
+  }
+]
+
+company> db.project.find().pretty()
+[
+  { _id: 1, dom: 'database' },
+  { _id: 2, dom: 'cloud' },
+  { _id: 3, dom: 'server' },
+  { _id: 4, dom: 'frontend' },
+  { _id: 5, dom: 'systems' }
+]
+
+company> db.department.find().pretty()
+[
+  { _id: 1, dept: 'Database' },
+  { _id: 2, dept: 'Cloud' },
+  { _id: 3, dept: 'HR' },
+  { _id: 4, dept: 'Server' }
+]
+
+company> db.employee.find({ deptno: db.department.findOne({dept: "HR"})._id })
+[
+  {
+    _id: 2,
+    name: 'Akbar',
+    deptno: 3,
+    projects: [
+      { pno: 4, hours: 20 },
+      { pno: 3, hours: 15 },
+      { pno: 1, hours: 10 }
+    ]
+  },
+  {
+    _id: 5,
+    name: 'Shailaja',
+    deptno: 3,
+    projects: [ { pno: 2, hours: 7 }, { pno: 1, hours: 19 } ]
+  }
+]
+
+company> db.employee.find( {"projects.pno": 3}, {name: 1, _id: 0}).pretty()
+[ { name: 'Akbar' }, { name: 'Anthony' } ]
