@@ -1,0 +1,202 @@
+SQL> CREATE TABLE DEPARTMENT(
+  2  DEPTNO INT PRIMARY KEY,
+  3  DEPTNAME VARCHAR(15) NOT NULL
+  4  );
+
+Table created.
+
+SQL> CREATE TABLE EMPLOYEE(
+  2  SSN INT PRIMARY KEY,
+  3  NAME VARCHAR(25) NOT NULL,
+  4  DNO INT,
+  5  FOREIGN KEY (DNO) REFERENCES DEPARTMENT(DEPTNO) ON DELETE CASCADE
+  6  );
+
+Table created.
+
+SQL> CREATE TABLE PROJECT(
+  2  PROJID INT PRIMARY KEY,
+  3  DOMAIN VARCHAR(15) NOT NULL
+  4  );
+
+Table created.
+
+SQL> CREATE TABLE WORKS_ON(
+  2  ESSN INT,
+  3  PID INT,
+  4  HOURS INT NOT NULL,
+  5  FOREIGN KEY (ESSN) REFERENCES EMPLOYEE(SSN) ON DELETE CASCADE,
+  6  FOREIGN KEY (PID) REFERENCES EMPLOYEE(SSN) ON DELETE CASCADE
+  7  );
+
+Table created.
+
+SQL> INSERT INTO DEPARTMENT VALUES(1, 'DEPT1');
+
+1 row created.
+
+SQL> INSERT INTO DEPARTMENT VALUES(2, 'DEPT2');
+
+1 row created.
+
+SQL> INSERT INTO DEPARTMENT VALUES(3, 'DEPT3');
+
+1 row created.
+
+SQL> INSERT INTO DEPARTMENT VALUES(4, 'DEPT4');
+
+1 row created.
+
+SQL> INSERT INTO EMPLOYEE VALUES(1, 'SATISH', 2);
+
+1 row created.
+
+SQL> INSERT INTO EMPLOYEE VALUES(2, 'RAMESH', 3);
+
+1 row created.
+
+SQL> INSERT INTO EMPLOYEE VALUES(3, 'SURESH', 2);
+
+1 row created.
+
+SQL> INSERT INTO EMPLOYEE VALUES(4, 'ABDUL', 1);
+
+1 row created.
+
+SQL> INSERT INTO EMPLOYEE VALUES(5, 'WADE', 3);
+
+1 row created.
+
+SQL> INSERT INTO EMPLOYEE VALUES(6, 'RAHMAN', 4);
+
+1 row created.
+
+SQL> INSERT INTO PROJECT VALUES(1, 'DATABASE');
+
+1 row created.
+
+SQL> INSERT INTO PROJECT VALUES(2, 'CLOUD');
+
+1 row created.
+
+SQL> INSERT INTO PROJECT VALUES(3, 'SERVER');
+
+1 row created.
+
+SQL> INSERT INTO PROJECT VALUES(4, 'WEB');
+
+1 row created.
+
+SQL> INSERT INTO PROJECT VALUES(5, 'DEVOPS');
+
+1 row created.
+
+SQL> INSERT INTO WORKS_ON VALUES(1, 2, 25);
+
+1 row created.
+
+SQL> INSERT INTO WORKS_ON VALUES(1, 3, 20);
+
+1 row created.
+
+SQL> INSERT INTO WORKS_ON VALUES(2, 3, 12);
+
+1 row created.
+
+SQL> INSERT INTO WORKS_ON VALUES(3, 4, 25);
+
+1 row created.
+
+SQL> INSERT INTO WORKS_ON VALUES(2, 4, 30);
+
+1 row created.
+
+SQL> INSERT INTO WORKS_ON VALUES(4, 1, 40);
+
+1 row created.
+
+SQL> INSERT INTO WORKS_ON VALUES(6, 1, 38);
+
+1 row created.
+
+SQL> SELECT * FROM DEPARTMENT;
+
+    DEPTNO DEPTNAME
+---------- ---------------
+	 1 DEPT1
+	 2 DEPT2
+	 3 DEPT3
+	 4 DEPT4
+
+SQL> SELECT * FROM EMPLOYEE;
+
+       SSN NAME 			    DNO
+---------- ------------------------- ----------
+	 1 SATISH			      2
+	 2 RAMESH			      3
+	 3 SURESH			      2
+	 4 ABDUL			      1
+	 5 WADE 			      3
+	 6 RAHMAN			      4
+
+6 rows selected.
+
+SQL> SELECT * FROM PROJECT;
+
+    PROJID DOMAIN
+---------- ---------------
+	 1 DATABASE
+	 2 CLOUD
+	 3 SERVER
+	 4 WEB
+	 5 DEVOPS
+
+SQL> SELECT * FROM WORKS_ON;
+
+      ESSN	  PID	   HOURS
+---------- ---------- ----------
+	 1	    2	      25
+	 1	    3	      20
+	 2	    3	      12
+	 3	    4	      25
+	 2	    4	      30
+	 4	    1	      40
+	 6	    1	      38
+
+7 rows selected.
+
+SQL> SELECT E.SSN, E.NAME, E.DNO
+  2  FROM EMPLOYEE E, WORKS_ON W, PROJECT P
+  3  WHERE E.SSN = W.ESSN AND W.PID = P.PROJID AND P.DOMAIN = 'DATABASE';
+
+       SSN NAME 			    DNO
+---------- ------------------------- ----------
+	 4 ABDUL			      1
+	 6 RAHMAN			      4
+
+SQL> SELECT D.DEPTNO, D.DEPTNAME, COUNT(E.SSN)
+  2  FROM DEPARTMENT D, EMPLOYEE E
+  3  WHERE D.DEPTNO = E.DNO
+  4  GROUP BY D.DEPTNO, D.DEPTNAME
+  5  ORDER BY D.DEPTNO;
+
+    DEPTNO DEPTNAME	   COUNT(E.SSN)
+---------- --------------- ------------
+	 1 DEPT1		      1
+	 2 DEPT2		      2
+	 3 DEPT3		      2
+	 4 DEPT4		      1
+
+SQL> SELECT * FROM WORKS_ON;
+
+      ESSN	  PID	   HOURS
+---------- ---------- ----------
+	 1	    2	      25
+	 1	    3	      20
+	 2	    3	      12
+	 3	    4	      25
+	 2	    4	      30
+	 4	    1	      40
+	 6	    5	      38
+
+7 rows selected.
