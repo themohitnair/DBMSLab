@@ -1,0 +1,217 @@
+SQL> CREATE TABLE CUSTOMER(
+  2  ID INT PRIMARY KEY,
+  3  NAME VARCHAR(25) NOT NULL
+  4  );
+
+Table created.
+
+SQL> CREATE TABLE BRANCH(
+  2  NO INT PRIMARY KEY,
+  3  LOC VARCHAR(25) NOT NULL
+  4  );
+
+Table created.
+
+SQL> CREATE TABLE ACCOUNT(
+  2  ID INT PRIMARY KEY,
+  3  CID INT,
+  4  BNO INT,
+  5  TYPE VARCHAR(1) NOT NULL,
+  6  FOREIGN KEY (CID) REFERENCES CUSTOMER(ID) ON DELETE CASCADE,
+  7  FOREIGN KEY (BNO) REFERENCES BRANCH(NO) ON DELETE CASCADE
+  8  );
+
+Table created.
+
+SQL> CREATE TABLE TRANSACTION(
+  2  ID INT PRIMARY KEY,
+  3  AID INT,
+  4  AMT INT NOT NULL,
+  5  TYPE VARCHAR(1) NOT NULL,
+  6  DOT DATE NOT NULL,
+  7  FOREIGN KEY (AID) REFERENCES ACCOUNT(ID) ON DELETE CASCADE
+  8  );
+
+Table created.
+
+SQL> INSERT INTO CUSTOMER VALUES(1, 'GRAFF');
+
+1 row created.
+
+SQL> INSERT INTO CUSTOMER VALUES(2, 'AGASSI');
+
+1 row created.
+
+SQL> INSERT INTO CUSTOMER VALUES(3, 'CELES');
+
+1 row created.
+
+SQL> INSERT INTO CUSTOMER VALUES(4, 'BORG');
+
+1 row created.
+
+SQL> INSERT INTO BRANCH VALUES(1, 'NEW YORK');
+
+1 row created.
+
+SQL> INSERT INTO BRANCH VALUES(2, 'MUMBAI');
+
+1 row created.
+
+SQL> INSERT INTO BRANCH VALUES(3, 'PERTH');
+
+1 row created.
+
+SQL> INSERT INTO BRANCH VALUES(4, 'TOKYO');
+
+1 row created.
+
+SQL> INSERT INTO ACCOUNT VALUES(1, 2, 2, 'S');
+
+1 row created.
+
+SQL> INSERT INTO ACCOUNT VALUES(2, 1, 1, 'S');
+
+1 row created.
+
+SQL> INSERT INTO ACCOUNT VALUES(3, 2, 3, 'C');
+
+1 row created.
+
+SQL> INSERT INTO ACCOUNT VALUES(4, 3, 1, 'S');
+
+1 row created.
+
+SQL> INSERT INTO ACCOUNT VALUES(5, 4, 1, 'C');
+
+1 row created.
+
+SQL> INSERT INTO ACCOUNT VALUES(6, 4, 2, 'S');
+
+1 row created.
+
+SQL> INSERT INTO TRANSACTION VALUES(1, 3, 45000, 'D', '01-AUG-2024');
+
+1 row created.
+
+SQL> INSERT INTO TRANSACTION VALUES(2, 1, 5000, 'W', '01-AUG-2024');
+
+1 row created.
+
+SQL> INSERT INTO TRANSACTION VALUES(3, 2, 100000, 'D', '02-AUG-2024');
+
+1 row created.
+
+SQL> INSERT INTO TRANSACTION VALUES(4, 3, 9000, 'W', '02-AUG-2024');
+
+1 row created.
+
+SQL> INSERT INTO TRANSACTION VALUES(5, 1, 90000, 'D', '05-AUG-2024');
+
+1 row created.
+
+SQL> INSERT INTO TRANSACTION VALUES(6, 6, 100000, 'D', '05-AUG-2024');
+
+1 row created.
+
+SQL> INSERT INTO TRANSACTION VALUES(7, 6, 90000, 'W', '06-AUG-2024');
+
+1 row created.
+
+SQL> SELECT * FROM CUSTOMER;
+
+	ID NAME
+---------- -------------------------
+	 1 GRAFF
+	 2 AGASSI
+	 3 CELES
+	 4 BORG
+
+SQL> SELECT * FROM BRANCH;
+
+	NO LOC
+---------- -------------------------
+	 1 NEW YORK
+	 2 MUMBAI
+	 3 PERTH
+	 4 TOKYO
+
+SQL> SELECT * FROM ACCOUNT;
+
+	ID	  CID	     BNO T
+---------- ---------- ---------- -
+	 1	    2	       2 S
+	 2	    1	       1 S
+	 3	    2	       3 C
+	 4	    3	       1 S
+	 5	    4	       1 C
+	 6	    4	       2 S
+
+6 rows selected.
+
+SQL> SELECT * FROM TRANSACTION;
+
+	ID	  AID	     AMT T DOT
+---------- ---------- ---------- - ---------
+	 1	    3	   45000 D 01-AUG-24
+	 2	    1	    5000 W 01-AUG-24
+	 3	    2	  100000 D 02-AUG-24
+	 4	    3	    9000 W 02-AUG-24
+	 5	    1	   90000 D 05-AUG-24
+	 6	    6	  100000 D 05-AUG-24
+	 7	    6	   90000 W 06-AUG-24
+
+7 rows selected.
+
+SQL> SELECT C.ID, C.NAME
+  2  FROM CUSTOMER C, ACCOUNT A
+  3  WHERE C.ID = A.CID AND A.TYPE IN ('S', 'C')
+  4  GROUP BY C.ID, C.NAME
+  5  HAVING COUNT(DISTINCT A.TYPE) = 2
+  6  ORDER BY C.ID;
+
+	ID NAME
+---------- -------------------------
+	 2 AGASSI
+	 4 BORG
+
+SQL> SELECT B.NO, B.LOC, COUNT(A.ID) AS NUM_OF_ACCOUNTS
+  2  FROM ACCOUNT A, BRANCH B
+  3  WHERE A.BNO = B.NO
+  4  GROUP BY B.NO, B.LOC
+  5  ORDER BY B.NO;
+
+	NO LOC			     NUM_OF_ACCOUNTS
+---------- ------------------------- ---------------
+	 1 NEW YORK				   3
+	 2 MUMBAI				   2
+	 3 PERTH				   1
+
+SQL> SELECT C.ID, C.NAME
+  2  FROM CUSTOMER C, ACCOUNT A, TRANSACTION T
+  3  WHERE C.ID = A.CID AND A.ID = T.AID
+  4  GROUP BY C.ID, C.NAME
+  5  HAVING COUNT(T.ID) >= 3
+  6  ORDER BY C.ID;
+
+	ID NAME
+---------- -------------------------
+	 2 AGASSI
+
+SQL> WITH BNO_ACC AS (
+  2  SELECT B.NO, B.LOC, COUNT(A.ID) AS NO_ACCS
+  3  FROM BRANCH B, ACCOUNT A
+  4  WHERE B.NO = A.BNO
+  5  GROUP BY B.NO, B.LOC
+  6  ORDER BY B.NO
+  7  )
+  8  SELECT BA.NO, BA.LOC
+  9  FROM BNO_ACC BA
+ 10  WHERE BA.NO_ACCS < (
+ 11  SELECT AVG(NO_ACCS)
+ 12  FROM BNO_ACC
+ 13  );
+
+	NO LOC
+---------- -------------------------
+	 3 PERTH
