@@ -1,0 +1,142 @@
+SQL> CREATE TABLE BOOK(
+  2  ISBN INT PRIMARY KEY,
+  3  TITLE VARCHAR(50) NOT NULL,
+  4  AUTHOR VARCHAR(25) NOT NULL,
+  5  PUBLISHER VARCHAR(25) NOT NULL
+  6  );
+
+Table created.
+
+SQL> CREATE TABLE STUDENT(
+  2  ID INT PRIMARY KEY,
+  3  NAME VARCHAR(25) NOT NULL,
+  4  SEX VARCHAR(1) NOT NULL
+  5  );
+
+Table created.
+
+SQL> CREATE TABLE BORROWS(
+  2  SID INT,
+  3  BISBN INT,
+  4  DOB DATE NOT NULL,
+  5  FOREIGN KEY (SID) REFERENCES STUDENT(ID) ON DELETE CASCADE,
+  6  FOREIGN KEY (BISBN) REFERENCES BOOK(ISBN) ON DELETE CASCADE
+  7  );
+
+Table created.
+
+SQL> INSERT INTO STUDENT VALUES(1, 'OGGY', 'M');
+
+1 row created.
+
+SQL> INSERT INTO STUDENT VALUES(2, 'OLLIE', 'F');
+
+1 row created.
+
+SQL> INSERT INTO STUDENT VALUES(3, 'JACK', 'M');
+
+1 row created.
+
+SQL> INSERT INTO STUDENT VALUES(4, 'BOB', 'M');
+
+1 row created.
+
+SQL> INSERT INTO BOOK VALUES(123, 'DATABASES', 'DEE DEE', 'WILEY');
+
+1 row created.
+
+SQL> INSERT INTO BOOK VALUES(124, 'ADVANCED JAVA', 'MARKY', 'ADDISON-WESLEY');
+
+1 row created.
+
+SQL> INSERT INTO BOOK VALUES(125, 'DESIGN AND ANALYSIS OF ALGORITHMS', 'JOEY', 'PEARSON');
+
+1 row created.
+
+SQL> INSERT INTO BORROWS VALUES(1, 125, '05-AUG-24');
+
+1 row created.
+
+SQL> INSERT INTO BORROWS VALUES(1, 124, '05-AUG-24');
+
+1 row created.
+
+SQL> INSERT INTO BORROWS VALUES(2, 123, '06-AUG-24');
+
+1 row created.
+
+SQL> INSERT INTO BORROWS VALUES(3, 125, '06-AUG-2024');
+
+1 row created.
+
+SQL> INSERT INTO BORROWS VALUES(4, 123, '07-AUG-2024');
+
+1 row created.
+
+SQL> INSERT INTO BORROWS VALUES(4, 123, '08-AUG-2024');
+
+1 row created.
+
+SQL> SELECT * FROM STUDENT;
+
+	ID NAME 		     S
+---------- ------------------------- -
+	 1 OGGY 		     M
+	 2 OLLIE		     F
+	 3 JACK 		     M
+	 4 BOB			     M
+
+SQL> SELECT * FROM BOOK;
+
+ISBN       TITLE                                AUTHOR              PUBLISHER
+---------- ------------------------------------ ------------------- -------------------
+123        DATABASES                            DEE DEE             WILEY
+124        ADVANCED JAVA                        MARKY               ADDISON-WESLEY
+125        DESIGN AND ANALYSIS OF ALGORITHMS    JOEY                PEARSON
+
+
+
+SQL> SELECT * FROM BORROWS;
+
+       SID	BISBN DOB
+---------- ---------- ---------
+	 1	  125 05-AUG-24
+	 1	  124 05-AUG-24
+	 2	  123 06-AUG-24
+	 3	  125 06-AUG-24
+	 4	  123 07-AUG-24
+	 4	  123 08-AUG-24
+
+6 rows selected.
+
+SQL> SELECT S.NAME
+  2  FROM STUDENT S, BORROWS B
+  3  WHERE S.ID = B.SID AND B.BISBN IN (123, 124)
+  4  GROUP BY S.NAME;
+
+NAME
+-------------------------
+OGGY
+OLLIE
+BOB
+
+SQL> SELECT S.NAME
+  2  FROM STUDENT S, BORROWS BW, BOOK B
+  3  WHERE S.ID = BW.SID AND B.ISBN = BW.BISBN AND S.SEX = 'F' AND B.TITLE LIKE '%DATABASE%';
+
+NAME
+-------------------------
+OLLIE
+
+SQL> SELECT S.ID, S.NAME, S.SEX, COUNT(B.ISBN) AS NUM_OF_BOOKS
+  2  FROM STUDENT S, BOOK B, BORROWS BW
+  3  WHERE B.ISBN = BW.BISBN AND S.ID = BW.SID
+  4  GROUP BY S.ID, S.NAME, S.SEX
+  5  ORDER BY S.ID;
+
+	ID NAME 		     S NUM_OF_BOOKS
+---------- ------------------------- - ------------
+	 1 OGGY 		     M		  2
+	 2 OLLIE		     F		  1
+	 3 JACK 		     M		  1
+	 4 BOB			     M		  2
