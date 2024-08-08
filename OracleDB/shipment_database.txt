@@ -1,0 +1,157 @@
+SQL> CREATE TABLE SUPPLIER(
+  2  SID INT PRIMARY KEY,
+  3  SNAME VARCHAR(15) NOT NULL,
+  4  SADDR VARCHAR(25) NOT NULL
+  5  );
+
+Table created.
+
+SQL> CREATE TABLE PART(
+  2  PID INT PRIMARY KEY,
+  3  PNAME VARCHAR(10) NOT NULL,
+  4  PCOLOR VARCHAR(10) NOT NULL
+  5  );
+
+Table created.
+
+SQL> CREATE TABLE SHIPMENT(
+  2  SID INT,
+  3  PID INT,
+  4  QTY INT NOT NULL,
+  5  FOREIGN KEY(SID) REFERENCES SUPPLIER(SID) ON DELETE CASCADE,
+  6  FOREIGN KEY(PID) REFERENCES PART(PID) ON DELETE CASCADE
+  7  );
+
+Table created.
+
+SQL> INSERT INTO SUPPLIER VALUES(1, 'MAMATA', 'WEST BENGAL');
+
+1 row created.
+
+SQL> INSERT INTO SUPPLIER VALUES(2, 'SHAH', 'GUJARAT');
+
+1 row created.
+
+SQL> INSERT INTO SUPPLIER VALUES(3, 'PATTANAIK', 'ODISHA');
+
+1 row created.
+
+SQL> INSERT INTO SUPPLIER VALUES(4, 'STALIN', 'TAMIL NADU');
+
+1 row created.
+
+SQL> INSERT INTO PART VALUES(1, 'SCREW', 'SILVER');
+
+1 row created.
+
+SQL> INSERT INTO PART VALUES(2, 'NUT', 'BLACK');
+
+1 row created.
+
+SQL> INSERT INTO PART VALUES(3, 'WASHER', 'RED');
+
+1 row created.
+
+SQL> INSERT INTO PART VALUES(4, 'VALVE', 'WHITE');
+
+1 row created.
+
+SQL> INSERT INTO SHIPMENT VALUES(1, 1, 500);
+
+1 row created.
+
+SQL> INSERT INTO SHIPMENT VALUES(1, 2, 400);
+
+1 row created.
+
+SQL> INSERT INTO SHIPMENT VALUES(2, 1, 100);
+
+1 row created.
+
+SQL> INSERT INTO SHIPMENT VALUES(3, 2, 450);
+
+1 row created.
+
+SQL> INSERT INTO SHIPMENT VALUES(3, 4, 1000);
+
+1 row created.
+
+SQL> INSERT INTO SHIPMENT VALUES(4, 4, 100);
+
+1 row created.
+
+SQL> SELECT * FROM SUPPLIER;
+
+       SID SNAME	   SADDR
+---------- --------------- -------------------------
+	 1 MAMATA	   WEST BENGAL
+	 2 SHAH 	   GUJARAT
+	 3 PATTANAIK	   ODISHA
+	 4 STALIN	   TAMIL NADU
+
+SQL> SELECT * FROM PART;
+
+       PID PNAME      PCOLOR
+---------- ---------- ----------
+	 1 SCREW      SILVER
+	 2 NUT	      BLACK
+	 3 WASHER     RED
+	 4 VALVE      WHITE
+
+SQL> SELECT * FROM SHIPMENT;
+
+       SID	  PID	     QTY
+---------- ---------- ----------
+	 1	    1	     500
+	 1	    2	     400
+	 2	    1	     100
+	 3	    2	     450
+	 3	    4	    1000
+	 4	    4	     100
+
+6 rows selected.
+
+SQL> SELECT P.PID, P.PNAME, P.PCOLOR FROM
+  2  PART P, SUPPLIER S, SHIPMENT ST
+  3  WHERE P.PID = ST.PID AND S.SID = ST.SID AND SNAME = 'PATTANAIK'
+  4  ORDER BY P.PID;
+
+       PID PNAME      PCOLOR
+---------- ---------- ----------
+	 2 NUT	      BLACK
+	 4 VALVE      WHITE
+
+SQL> SELECT S.SNAME FROM
+  2  SUPPLIER S, PART P, SHIPMENT ST
+  3  WHERE S.SID = ST.SID AND P.PID = ST.PID AND P.PNAME = 'VALVE';
+
+SNAME
+---------------
+PATTANAIK
+STALIN
+
+SQL> DELETE FROM PART
+  2  WHERE PCOLOR = 'RED';
+
+1 row deleted.
+
+SQL> SELECT * FROM PART;
+
+       PID PNAME      PCOLOR
+---------- ---------- ----------
+	 1 SCREW      SILVER
+	 2 NUT	      BLACK
+	 4 VALVE      WHITE
+
+SQL> SELECT * FROM SHIPMENT;
+
+       SID	  PID	     QTY
+---------- ---------- ----------
+	 1	    1	     500
+	 1	    2	     400
+	 2	    1	     100
+	 3	    2	     450
+	 3	    4	    1000
+	 4	    4	     100
+
+6 rows selected.

@@ -174,18 +174,10 @@ SQL> SELECT E.SSN, E.NAME, E.DNO
 	 4 ABDUL			      1
 	 6 RAHMAN			      4
 
-SQL> SELECT D.DEPTNO, D.DEPTNAME, COUNT(E.SSN)
-  2  FROM DEPARTMENT D, EMPLOYEE E
-  3  WHERE D.DEPTNO = E.DNO
-  4  GROUP BY D.DEPTNO, D.DEPTNAME
-  5  ORDER BY D.DEPTNO;
+SQL> UPDATE WORKS_ON
+  2  SET PID = 5 WHERE ESSN = 6;
 
-    DEPTNO DEPTNAME	   COUNT(E.SSN)
----------- --------------- ------------
-	 1 DEPT1		      1
-	 2 DEPT2		      2
-	 3 DEPT3		      2
-	 4 DEPT4		      1
+1 row updated.
 
 SQL> SELECT * FROM WORKS_ON;
 
@@ -200,3 +192,16 @@ SQL> SELECT * FROM WORKS_ON;
 	 6	    5	      38
 
 7 rows selected.
+
+SQL> SELECT D.DEPTNO, D.DEPTNAME, COUNT(E.SSN) AS NUM_OF_EMPLOYEES
+  2  FROM DEPARTMENT D, EMPLOYEE E
+  3  WHERE D.DEPTNO = E.DNO
+  4  GROUP BY D.DEPTNO, D.DEPTNAME
+  5  ORDER BY D.DEPTNO;
+
+    DEPTNO DEPTNAME	   NUM_OF_EMPLOYEES
+---------- --------------- ----------------
+	 1 DEPT1			  1
+	 2 DEPT2			  2
+	 3 DEPT3			  2
+	 4 DEPT4			  1
