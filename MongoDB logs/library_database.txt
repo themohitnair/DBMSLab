@@ -1,0 +1,59 @@
+bank> use library
+switched to db library
+library> db.createCollection("book")
+{ ok: 1 }
+library> db.createCollection("student")
+{ ok: 1 }
+library> db.createCollection("borrows")
+{ ok: 1 }
+library> db.student.insertMany([
+... {_id: 1, name: "Tony"},
+... {_id: 2, name: "Steve"},
+... {_id: 3, name: "Natasha"},
+... {_id: 4, name: "Wanda"}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+library> db.book.insertMany([
+... {_id: 1, title: "Database", author: "Thanos", publisher: "Hydra"},
+... {_id: 2, title: "Advanced Java", author: "Loki", publisher: "Skrull"},
+... {_id: 3, title: "Algorithms", author: "Ultron", publisher: "Zemo"}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3 } }
+library> db.borrows.insertMany([
+... {_id: 1, sid: 1, isbn: 1, date: '06-aug-2024'},
+... {_id: 2, sid: 1, isbn: 2, date: '07-aug-2024'},
+... {_id: 3, sid: 2, isbn: 3, date: '08-aug-2024'},
+... {_id: 4, sid: 4, isbn: 4, date: '08-aug-2024'}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+library> db.book.find().pretty()
+[
+  { _id: 1, title: 'Database', author: 'Thanos', publisher: 'Hydra' },
+  {
+    _id: 2,
+    title: 'Advanced Java',
+    author: 'Loki',
+    publisher: 'Skrull'
+  },
+  { _id: 3, title: 'Algorithms', author: 'Ultron', publisher: 'Zemo' }
+]
+library> db.student.find().pretty()
+[
+  { _id: 1, name: 'Tony' },
+  { _id: 2, name: 'Steve' },
+  { _id: 3, name: 'Natasha' },
+  { _id: 4, name: 'Wanda' }
+]
+library> db.borrows.find().pretty()
+[
+  { _id: 1, sid: 1, isbn: 1, date: '06-aug-2024' },
+  { _id: 2, sid: 1, isbn: 2, date: '07-aug-2024' },
+  { _id: 3, sid: 2, isbn: 3, date: '08-aug-2024' },
+  { _id: 4, sid: 4, isbn: 4, date: '08-aug-2024' }
+]
+library> db.book.find({author: "Ultron"})
+[
+  { _id: 3, title: 'Algorithms', author: 'Ultron', publisher: 'Zemo' }
+]
+library> db.borrows.aggregate([ { $lookup: { from: "book", localField: "isbn", foreignField: "_id", as: "bookInfo" } }, { $unwind: "$bookInfo" }, { $match: {"bookInfo.title": "Database"} }, { $lookup: { from: "student", localField: "sid", foreignField: "_id", as: "studentInfo" } }, { $unwind: "$studentInfo" }, { $project: { _id: 1, name: "$studentInfo.name" } }] )
+[ { _id: 1, name: 'Tony' } ]

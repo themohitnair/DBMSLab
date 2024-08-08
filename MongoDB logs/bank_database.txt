@@ -1,0 +1,87 @@
+test> use bank
+switched to db bank
+bank> db.createCollection("customer")
+{ ok: 1 }
+bank> db.createCollection("branch")
+{ ok: 1 }
+bank> db.createCollection("account")
+{ ok: 1 }
+bank> db.createCollection("transaction")
+{ ok: 1 }
+bank> db.branch.insertMany([
+... {_id: 1, loc: "Bombay"},
+... {_id: 2, loc: "Madras"},
+... {_id: 3, loc: "Cannanore"},
+... {_id: 4, loc: "Trivandrum"}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+bank> db.customer.insertMany([
+... {_id: 1, name: "Sheldon"},
+... {_id: 2, name: "Raj"},
+... {_id: 3, name: "Leonard"},
+... {_id: 4, name: "Penny"}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+bank> db.account.insertMany([
+... {_id: 1, cid: 1, bid: 2, type: "S"},
+... {_id: 2, cid: 1, bid: 3, type: "C"},
+... {_id: 3, cid: 2, bid: 2, type: "C"},
+... {_id: 4, cid: 4, bid: 1, type: "S"},
+... {_id: 5, cid: 3, bid: 4, type: "S"},
+... {_id: 6, cid: 4, bid: 2, type: "S"}
+... ])
+{
+  acknowledged: true,
+  insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5, '5': 6 }
+}
+bank> db.transaction.insertMany([
+... {_id: 1, aid: 1, amt: 49000, type: 'W'},
+... {_id: 2, aid: 3, amt: 90000, type: 'D'},
+... {_id: 3, aid: 2, amt: 45000, type: 'D'},
+... {_id: 4, aid: 3, amt: 45000, type: 'W'},
+... {_id: 5, aid: 4, amt: 5000, type: 'W'}
+... ])
+{
+  acknowledged: true,
+  insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5 }
+}
+bank> db.branch.find().pretty()
+[
+  { _id: 1, loc: 'Bombay' },
+  { _id: 2, loc: 'Madras' },
+  { _id: 3, loc: 'Cannanore' },
+  { _id: 4, loc: 'Trivandrum' }
+]
+bank> db.customer.find().pretty()
+[
+  { _id: 1, name: 'Sheldon' },
+  { _id: 2, name: 'Raj' },
+  { _id: 3, name: 'Leonard' },
+  { _id: 4, name: 'Penny' }
+]
+bank> db.account.find().pretty()
+[
+  { _id: 1, cid: 1, bid: 2, type: 'S' },
+  { _id: 2, cid: 1, bid: 3, type: 'C' },
+  { _id: 3, cid: 2, bid: 2, type: 'C' },
+  { _id: 4, cid: 4, bid: 1, type: 'S' },
+  { _id: 5, cid: 3, bid: 4, type: 'S' },
+  { _id: 6, cid: 4, bid: 2, type: 'S' }
+]
+bank> db.transaction.find().pretty()
+[
+  { _id: 1, aid: 1, amt: 49000, type: 'W' },
+  { _id: 2, aid: 3, amt: 90000, type: 'D' },
+  { _id: 3, aid: 2, amt: 45000, type: 'D' },
+  { _id: 4, aid: 3, amt: 45000, type: 'W' },
+  { _id: 5, aid: 4, amt: 5000, type: 'W' }
+]
+bank> db.branch.find({_id: 2}, {_id: 0, loc: 1})
+[ { loc: 'Madras' } ]
+bank> db.account.aggregate([ { $group: { _id: "$cid", numAccounts: { $sum: 1 } } }, { $lookup: { from: "customer", localField: "_id", foreignField: "_id", as: "numAcc" } }, { $unwind: "$numAcc" }, { $project: { _id: 1, name: "$numAcc.name", numAccounts: 1 } }] )
+[
+  { _id: 2, numAccounts: 1, name: 'Raj' },
+  { _id: 1, numAccounts: 2, name: 'Sheldon' },
+  { _id: 4, numAccounts: 2, name: 'Penny' },
+  { _id: 3, numAccounts: 1, name: 'Leonard' }
+]

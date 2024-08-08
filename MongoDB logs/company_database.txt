@@ -1,0 +1,74 @@
+test> use company
+switched to db company
+company> db.createCollection("employee")
+{ ok: 1 }
+company> db.createCollection("department")
+{ ok: 1 }
+company> db.createCollection("project")
+{ ok: 1 }
+company> db.project.insertMany([
+... {_id: 1, dom: "cloud"},
+... {_id: 2, dom: "server"},
+... {_id: 3, dom: "devops"},
+... {_id: 4, dom: "database"}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+company> db.department.insertMany([
+... {_id: 1, dept: "Database"},
+... {_id: 2, dept: "Systems"},
+... {_id: 3, dept: "Automation"},
+... {_id: 4, dept: "Devops"}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+company> db.employee.insertMany([
+... {_id: 1, name: "Poison Ivy", deptno: 2, projects: [{pno: 1, hours: 12}, {pno: 4, hours: 14}]},
+... {_id: 2, name: "Bane", deptno: 3, projects: [{pno: 1, hours: 17}, {pno: 3, hours: 14}]},
+... {_id: 3, name: "Killer Croc", deptno: 1, projects: [{pno: 2, hours: 16}, {pno: 4, hours: 17}]},
+... {_id: 4, name: "Joker", deptno: 2, projects: [{pno: 2, hours: 20}]}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+company> db.project.find().pretty()
+[
+  { _id: 1, dom: 'cloud' },
+  { _id: 2, dom: 'server' },
+  { _id: 3, dom: 'devops' },
+  { _id: 4, dom: 'database' }
+]
+company> db.department.find().pretty()
+[
+  { _id: 1, dept: 'Database' },
+  { _id: 2, dept: 'Systems' },
+  { _id: 3, dept: 'Automation' },
+  { _id: 4, dept: 'Devops' }
+]
+company> db.employee.find().pretty()
+[
+  {
+    _id: 1,
+    name: 'Poison Ivy',
+    deptno: 2,
+    projects: [ { pno: 1, hours: 12 }, { pno: 4, hours: 14 } ]
+  },
+  {
+    _id: 2,
+    name: 'Bane',
+    deptno: 3,
+    projects: [ { pno: 1, hours: 17 }, { pno: 3, hours: 14 } ]
+  },
+  {
+    _id: 3,
+    name: 'Killer Croc',
+    deptno: 1,
+    projects: [ { pno: 2, hours: 16 }, { pno: 4, hours: 17 } ]
+  },
+  {
+    _id: 4,
+    name: 'Joker',
+    deptno: 2,
+    projects: [ { pno: 2, hours: 20 } ]
+  }
+]
+company> db.employee.find({deptno: db.department.findOne({dept: "Systems"})._id}, {name: 1})
+[ { _id: 1, name: 'Poison Ivy' }, { _id: 4, name: 'Joker' } ]
+company> db.employee.find({"projects.pno": 1}, {name: 1, _id: 0})
+[ { name: 'Poison Ivy' }, { name: 'Bane' } ]

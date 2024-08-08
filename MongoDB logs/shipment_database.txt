@@ -1,0 +1,88 @@
+company> use shipment
+switched to db shipment
+shipment> db.createCollection("part")
+{ ok: 1 }
+shipment> db.createCollection("supplier")
+{ ok: 1 }
+shipment> db.part.insertMany([
+... {_id: 1, name: "nut", color: "silver"},
+... {_id: 2, name: "bolt", color: "red"},
+... {_id: 3, name: "washer", color: "white"}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3 } }
+shipment> db.supplier.insertMany([
+... {_id: 1, name: "Robin", loc: "Gotham", parts: [{pno: 1, qty: 100}, {pno: 2, qty: 200}]},
+... {_id: 2, name: "Diana", loc: "Themyscira", parts: [{pno: 3, qty: 150}, {pno: 2, qty: 175}]},
+... {_id: 3, name: "Clark", loc: "Metropolis", parts: [{pno: 1, qty: 250}]}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3 } }
+shipment> db.part.find().pretty()
+[
+  { _id: 1, name: 'nut', color: 'silver' },
+  { _id: 2, name: 'bolt', color: 'red' },
+  { _id: 3, name: 'washer', color: 'white' }
+]
+shipment> db.supplier.find().pretty()
+[
+  {
+    _id: 1,
+    name: 'Robin',
+    loc: 'Gotham',
+    parts: [ { pno: 1, qty: 100 }, { pno: 2, qty: 200 } ]
+  },
+  {
+    _id: 2,
+    name: 'Diana',
+    loc: 'Themyscira',
+    parts: [ { pno: 3, qty: 150 }, { pno: 2, qty: 175 } ]
+  },
+  {
+    _id: 3,
+    name: 'Clark',
+    loc: 'Metropolis',
+    parts: [ { pno: 1, qty: 250 } ]
+  }
+]
+shipment> db.part.updateMany({_id: 2}, {$set: {name: "valve", color: "cyan"}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+shipment> db.part.find().pretty()
+[
+  { _id: 1, name: 'nut', color: 'silver' },
+  { _id: 2, name: 'valve', color: 'cyan' },
+  { _id: 3, name: 'washer', color: 'white' }
+]
+shipment> db.part.updateMany({_id: 2}, {$set: {name: "valve", color: "cyan"}})
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+shipment> db.part.find().pretty()
+[
+  { _id: 1, name: 'nut', color: 'silver' },
+  { _id: 2, name: 'valve', color: 'cyan' },
+  { _id: 3, name: 'washer', color: 'white' }
+]
+shipment> db.supplier.find({"parts.pno": 1})
+[
+  {
+    _id: 1,
+    name: 'Robin',
+    loc: 'Gotham',
+    parts: [ { pno: 1, qty: 100 }, { pno: 2, qty: 200 } ]
+  },
+  {
+    _id: 3,
+    name: 'Clark',
+    loc: 'Metropolis',
+    parts: [ { pno: 1, qty: 250 } ]
+  }
+]

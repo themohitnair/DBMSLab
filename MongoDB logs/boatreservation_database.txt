@@ -1,0 +1,65 @@
+shipment> use boats
+switched to db boats
+boats> db.createCollection("boat")
+{ ok: 1 }
+boats> db.createCollection("sailor")
+{ ok: 1 }
+boats> db.boat.insertMany([
+... {_id: 1, name: "prestige", color: "white"},
+... {_id: 2, name: "hotrod", color: "black"},
+... {_id: 3, name: "fuckall", color: "blue"}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3 } }
+boats> db.sailor.insertMany([
+... {_id: 1, name: "Alphons", age: 45, reservations: [{bid: 2, date: '05-aug-2024'}, {bid: 3, date: '06-aug-2024'}]},
+... {_id: 2, name: "Martinez", age: 25, reservations: [{bid: 3, date: '06-aug-2024'}, {bid: 1, date: '04-aug-2024'}]},
+... {_id: 3, name: "Gueterres", age: 27, reservations: [{bid: 1, date: '03-aug-2024'}]},
+... {_id: 4, name: "Javier", age: 63, reservations: [{bid: 2, date: '08-aug-2024'}]}
+... ])
+{ acknowledged: true, insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4 } }
+boats> db.boat.find().pretty()
+[
+  { _id: 1, name: 'prestige', color: 'white' },
+  { _id: 2, name: 'hotrod', color: 'black' },
+  { _id: 3, name: 'fuckall', color: 'blue' }
+]
+boats> db.sailor.find().pretty()
+[
+  {
+    _id: 1,
+    name: 'Alphons',
+    age: 45,
+    reservations: [
+      { bid: 2, date: '05-aug-2024' },
+      { bid: 3, date: '06-aug-2024' }
+    ]
+  },
+  {
+    _id: 2,
+    name: 'Martinez',
+    age: 25,
+    reservations: [
+      { bid: 3, date: '06-aug-2024' },
+      { bid: 1, date: '04-aug-2024' }
+    ]
+  },
+  {
+    _id: 3,
+    name: 'Gueterres',
+    age: 27,
+    reservations: [ { bid: 1, date: '03-aug-2024' } ]
+  },
+  {
+    _id: 4,
+    name: 'Javier',
+    age: 63,
+    reservations: [ { bid: 2, date: '08-aug-2024' } ]
+  }
+]
+boats> db.sailor.aggregate([
+... {$match: {name: "Martinez"}},
+... {$project: {_id: 0, name: 1, numberOfBoats: {$size: "$reservations"}}}
+... ])
+[ { name: 'Martinez', numberOfBoats: 2 } ]
+boats> db.boat.find({color: "black"})
+[ { _id: 2, name: 'hotrod', color: 'black' } ]
